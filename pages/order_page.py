@@ -1,27 +1,70 @@
-from selenium.webdriver.common.by import By
+import allure
+from pages.base_page import BasePage
+from pages.yandex_page import YandexPage
+from locators.order_page_locators import OrderPageLocators, OrderPage2Locators
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-class OrderPage:
-    BUTTON_NEXT = (By.XPATH, "//button[contains(text(),'Далее')]")
-    BUTTON_SCOOTER = (By.XPATH, "//img[@alt='Scooter']")
-    BUTTON_YANDEX = (By.XPATH, "//img[@alt='Yandex']")
-    NAME_FIELD = (By.XPATH, "//input[@placeholder='* Имя']")
-    SECOND_NAME_FIELD = (By.XPATH, "//input[@placeholder='* Фамилия']") #Поле фамилии
-    ADRESS_FIELD = (By.XPATH, "//input[@placeholder='* Адрес: куда привезти заказ']") #Поле адреса
-    METRO_FIELD = (By.XPATH,  "//input[@placeholder='* Станция метро']") #Станция метро
-    PHONE_FIELD = (By.XPATH, "//input[@placeholder='* Телефон: на него позвонит курьер']") #Телефон для курьера
-    CURRENT_METRO = (By.XPATH, "//div[@class='select_search select']") #локатор для списка станции метро
-    METRO_LIST = (By.CSS_SELECTOR, ".select-search__input")
 
-class YandexPage:
-    SEARCH_BUTTON = (By.XPATH, "//button[contains(text(),'Найти')]")
+class OrderPage(BasePage):
+    ORDER_PAGE_URL = "https://qa-scooter.praktikum-services.ru/order"
 
-class OrderPage2:
-    DATE_FIELD = (By.XPATH, "//input[@placeholder='* Когда привезти самокат']")  # Телефон курьера
-    RENT_TIME_FIELD = (By.XPATH, "//div[contains(text(),'* Срок аренды')]")  # Срок аренды
-    COMMENT_FIELD = (By.XPATH, "//input[@placeholder='Комментарий для курьера']") #Комментарий для курьера
-    RENT_TIME = (By.XPATH, "//div[contains(text(),'сутки')]")
-    COLOR_GREY = (By.XPATH, "//input[@id='grey']")
-    COLOR_BLACK = (By.XPATH, "//input[@id='black']")
-    ORDER_BUTTON = (By.CSS_SELECTOR, ".Button_Middle__1CSJM:nth-child(2)") #Кнопка заказа в нижней части страницы заказа
-    YES_BUTTON = (By.XPATH, "//button[contains(text(),'Да')]")
-    STATUS_BUTTON = (By.XPATH, "//button[contains(text(),'Посмотреть статус')]")
+    @allure.step('Открываем страницу заказа')
+    def get_order_page(self):
+        self.driver.get(self.ORDER_PAGE_URL)
+        self.find_element(OrderPageLocators.BUTTON_NEXT)
+
+    @allure.step('Вводим данные для заказа')
+    def enter_order_data(self, name, sec_name, adress, metro, phone, date, comment):
+        self.find_element(OrderPageLocators.NAME_FIELD).send_keys(name)
+        self.find_element(OrderPageLocators.SECOND_NAME_FIELD).send_keys(sec_name)
+        self.find_element(OrderPageLocators.ADRESS_FIELD).send_keys(adress)
+        metro_field = self.find_element(OrderPageLocators.METRO_FIELD)
+        metro_field.send_keys(metro)
+        metro_list = self.find_element(OrderPageLocators.METRO_LIST)
+        metro_list.send_keys(Keys.DOWN)
+        metro_list.send_keys(Keys.ENTER)
+        phone_field = self.find_element(OrderPageLocators.PHONE_FIELD)
+        phone_field.send_keys(phone)
+        next_button = self.find_element(OrderPageLocators.BUTTON_NEXT)
+        next_button.click()
+        date_field = self.find_element(OrderPage2Locators.DATE_FIELD)
+        date_field.send_keys(date)
+        date_field.send_keys(Keys.ENTER)
+        comment_field = self.find_element(OrderPage2Locators.COMMENT_FIELD)
+        comment_field.send_keys(comment)
+        rent_time_field = self.find_element(OrderPage2Locators.RENT_TIME_FIELD)
+        rent_time_field.click()
+        rent_time_value = self.find_element(OrderPage2Locators.RENT_TIME)
+        rent_time_value.click()
+        color_grey = self.find_element(OrderPage2Locators.COLOR_GREY)
+        color_grey.click()
+        color_black = self.find_element(OrderPage2Locators.COLOR_BLACK)
+        color_black.click()
+        order_button = self.find_element(OrderPage2Locators.ORDER_BUTTON)
+        order_button.click()
+
+    @allure.step('Нажимаем кнопку "Да"')
+    def click_yes_button(self):
+        self.click_element(OrderPage2Locators.YES_BUTTON)
+
+    @allure.step('Проверяем отображение кнопки статуса заказа')
+    def is_status_button_displayed(self):
+        return self.find_element(OrderPage2Locators.STATUS_BUTTON).is_displayed()
+
+    @allure.step('Нажимаем кнопку "Самокат"')
+    def click_scooter_button(self):
+        self.click_element(OrderPageLocators.BUTTON_SCOOTER)
+
+    @allure.step('Нажимаем кнопку "Яндекс"')
+    def click_yandex_button(self):
+        self.click_element(OrderPageLocators.BUTTON_YANDEX)
+
+    @allure.step('Проверяем что количество окон стало 2, и url нового окна соответствует ожидаемому')
+    def check_yandex_window(self, locator, timeout=10):
+        WebDriverWait(self.driver, timeout).until(EC.number_of_windows_to_be(2))
+        new_window = self.driver.window_handles[-1]
+        self.driver.switch_to.window(new_window)
+        WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(YandexPage.SEARCH_BUTTON))
+        return self.url_current() == locator
