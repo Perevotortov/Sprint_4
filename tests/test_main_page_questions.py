@@ -20,4 +20,4 @@ class TestQuestionsOnMainPage:
     def test_question_answer(self, driver, question_locator, answer_locator, true_text):
         main_page = MainPage(driver)
         main_page.get_question_answer(question_locator, answer_locator)
-        assert main_page.find_element(answer_locator).text == true_text
+        assert main_page.get_text_element(answer_locator) == true_text, f"Некорректный текст ответа. Ожидалось: {true_text}"

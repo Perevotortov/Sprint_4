@@ -19,4 +19,4 @@ class MainPageLocators:
     QUESTION8 = (By.XPATH, "//div[@id='accordion__heading-7']")
     TEXT8 = (By.XPATH, "//p[contains(text(),'Да, обязательно. Всем самокатов!')]")
     TOP_ORDER_BUTTON = (By.XPATH, "//button[contains(text(),'Заказать')]") #Кнопка для заказа в хедере
-    SECOND_ODRER_BUTTON = (By.XPATH, "//div[5]/button") #Кнопка для заказа в блоке "как это работает?"
+    SECOND_ODRER_BUTTON = (By.XPATH, "//button[@class='Button_Button__ra12g']")

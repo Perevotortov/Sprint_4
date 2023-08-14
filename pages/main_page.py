@@ -1,6 +1,6 @@
 import allure
 from locators.main_page_locators import MainPageLocators
-from pages.base_page import BasePage
+from .base_page import BasePage
 
 
 class MainPage(BasePage):
@@ -15,24 +15,15 @@ class MainPage(BasePage):
 
     MAIN_PAGE_URL = "https://qa-scooter.praktikum-services.ru/"
 
-    @allure.step('Проматываем страницу до раздела с вопросами')
-    def scroll_to_question(self, locator):
-        button = self.find_element(locator)
-        self.driver.execute_script("arguments[0].scrollIntoView();", button)
-
     @allure.step('Нажимаем вопрос')
     def click_question(self, locator):
         self.click_element(locator)
-
-    @allure.step('Проверяем отображение ответа')
-    def check_answer(self, locator):
-        return self.find_element(locator).is_displayed()
 
     @allure.step('Получаем ответ на вопрос после нажатия на него')
     def get_question_answer(self, question_locator, answer_locator):
         self.scroll_to_question(question_locator)
         self.click_question(question_locator)
-        answer = self.check_answer(answer_locator)
+        answer = self.check_element_displayed(answer_locator)
         return (question_locator, answer)
 
     @allure.step('Нажимаем на кнопку "Заказать" в хедере страницы')

@@ -1,5 +1,5 @@
 import allure
-from pages.base_page import BasePage
+from .base_page import BasePage
 from pages.yandex_page import YandexPage
 from locators.order_page_locators import OrderPageLocators, OrderPage2Locators
 from selenium.webdriver.common.keys import Keys
@@ -49,10 +49,6 @@ class OrderPage(BasePage):
     def click_yes_button(self):
         self.click_element(OrderPage2Locators.YES_BUTTON)
 
-    @allure.step('Проверяем отображение кнопки статуса заказа')
-    def is_status_button_displayed(self):
-        return self.find_element(OrderPage2Locators.STATUS_BUTTON).is_displayed()
-
     @allure.step('Нажимаем кнопку "Самокат"')
     def click_scooter_button(self):
         self.click_element(OrderPageLocators.BUTTON_SCOOTER)
@@ -61,10 +57,8 @@ class OrderPage(BasePage):
     def click_yandex_button(self):
         self.click_element(OrderPageLocators.BUTTON_YANDEX)
 
-    @allure.step('Проверяем что количество окон стало 2, и url нового окна соответствует ожидаемому')
+    @allure.step('Проверяем что url новой вкладки соответствует ожидаемому')
     def check_yandex_window(self, locator, timeout=10):
-        WebDriverWait(self.driver, timeout).until(EC.number_of_windows_to_be(2))
-        new_window = self.driver.window_handles[-1]
-        self.driver.switch_to.window(new_window)
+        self.windows_switch()
         WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(YandexPage.SEARCH_BUTTON))
         return self.url_current() == locator
