@@ -1,0 +1,9 @@
+/.idea/
+/venv/
+venv
+/__pycache__/
+tests/__pycache__/
+/.pytest_cache/
+geckodriver.log
+pages/__pycache__/
+locators/__pycache__/
